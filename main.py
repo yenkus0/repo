@@ -1,6 +1,5 @@
 from database.connection import Base, engine
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 import os
@@ -35,9 +34,6 @@ STATIC_DIR = Path(__file__).parent / "app" / "static"
 ASSETS_DIR = STATIC_DIR / "assets"
 DASHBOARD_DIR = STATIC_DIR / "template" / "pages" / "dashboardUser"
 
-FRONTEND_DIR = Path(__file__).parent / "app" / "static" / "template" / "pages" / "dashboardUser"
-
-# Monte le frontend à la racine
 # Dossiers pour images
 ANIMALS_IMG_DIR = ASSETS_DIR / "animals"
 STAFF_IMG_DIR = ASSETS_DIR / "staff_profiles"
@@ -47,40 +43,13 @@ os.makedirs(STAFF_IMG_DIR, exist_ok=True)
 
 # --- MONTAGE DES FICHIERS STATIQUES ---
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+# --- SERVE LE FRONTEND À LA RACINE ---
+FRONTEND_DIR = DASHBOARD_DIR  # Réutilise le chemin déjà défini
+print(f"Frontend directory: {FRONTEND_DIR}")
+print(f"Exists: {FRONTEND_DIR.exists()}")
+
 app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
-app.mount("/dashboardUser", StaticFiles(directory=DASHBOARD_DIR), name="dashboard")
-
-# --- FONCTION DE LECTURE SÉCURISÉE ---
-def read_html_file(file_path: Path) -> HTMLResponse:
-    try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
-    except FileNotFoundError:
-        return HTMLResponse(
-            content=f"<h1>404</h1><p>Fichier non trouvé : {file_path.name}</p>",
-            status_code=404
-        )
-
-# --- ROUTES PAGES ---
-@app.get("/", response_class=HTMLResponse)
-def landing_page():
-    file_path = STATIC_DIR / "template" / "pages" / "landing" / "landing.html"
-    return read_html_file(file_path)
-
-@app.get("/dashboard", response_class=HTMLResponse)
-def dashboard_index():
-    file_path = DASHBOARD_DIR / "index.html"
-    return read_html_file(file_path)
-
-@app.get("/dashboard/animaux", response_class=HTMLResponse)
-def dashboard_animals():
-    file_path = DASHBOARD_DIR / "cards.html"
-    return read_html_file(file_path)
-
-@app.get("/dashboard/staff", response_class=HTMLResponse)
-def dashboard_staff():
-    file_path = DASHBOARD_DIR / "staff.html"
-    return read_html_file(file_path)
 
 # --- ROUTERS API ---
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
