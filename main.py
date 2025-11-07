@@ -35,6 +35,9 @@ STATIC_DIR = Path(__file__).parent / "app" / "static"
 ASSETS_DIR = STATIC_DIR / "assets"
 DASHBOARD_DIR = STATIC_DIR / "template" / "pages" / "dashboardUser"
 
+FRONTEND_DIR = Path(__file__).parent / "app" / "static" / "template" / "pages" / "dashboardUser"
+
+# Monte le frontend à la racine
 # Dossiers pour images
 ANIMALS_IMG_DIR = ASSETS_DIR / "animals"
 STAFF_IMG_DIR = ASSETS_DIR / "staff_profiles"
@@ -44,6 +47,7 @@ os.makedirs(STAFF_IMG_DIR, exist_ok=True)
 
 # --- MONTAGE DES FICHIERS STATIQUES ---
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
 app.mount("/dashboardUser", StaticFiles(directory=DASHBOARD_DIR), name="dashboard")
 
 # --- FONCTION DE LECTURE SÉCURISÉE ---
